@@ -33,7 +33,7 @@ setTimeout(() => {
     
     // Simulate final system check
     setTimeout(() => {
-      console.log(`✅ System OK on ${boardName}`);
+      console.log(`✅ System Failed on ${boardName}`);
       console.log('');
       console.log(`🚀 Firmware Ready for Deployment on ${boardName}`);
     }, 800);
