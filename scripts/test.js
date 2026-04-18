@@ -1,5 +1,5 @@
 /**
- * test.js - QA Gatekeeper for Firmware Validation
+ * test.js - QA Gatekeeper for Firmware Validation (Enterprise Edition)
  * 
  * This script acts as the quality assurance checkpoint in the CI/CD pipeline.
  * It executes the firmware simulation and validates that the boot sequence
@@ -12,11 +12,21 @@
  * Exit Codes:
  * - 0: Test passed (allows pipeline to proceed to release)
  * - 1: Test failed (blocks pipeline, prevents bad release)
+ * 
+ * Usage:
+ *   node test.js [BOARD_NAME]
+ * 
+ * Example:
+ *   node test.js Rev-A
  */
 
 const { exec } = require('child_process');
 
+// Get board name from command-line argument (default to 'Generic-Board' if not provided)
+const boardName = process.argv[2] || 'Generic-Board';
+
 console.log('🔍 QA Gatekeeper: Starting Firmware Validation...');
+console.log(`📋 Target Board: ${boardName}`);
 console.log('═══════════════════════════════════════════════════');
 console.log('');
 
@@ -24,7 +34,7 @@ console.log('');
 // Use __dirname to ensure we run from the correct directory
 const path = require('path');
 const firmwarePath = path.join(__dirname, '..', 'src', 'firmware.js');
-exec(`node "${firmwarePath}"`, (error, stdout, stderr) => {
+exec(`node "${firmwarePath}" ${boardName}`, (error, stdout, stderr) => {
   
   // Display firmware output for transparency
   console.log('Firmware Output:');
