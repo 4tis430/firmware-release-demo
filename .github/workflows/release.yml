@@ -228,3 +228,63 @@ jobs:
           echo "Validated Boards: Rev-A, Rev-B, Rev-C"
           echo "Status: Published to GitHub Releases"
           echo "=========================================="
+  
+  
+  # ============================================================================
+  # JOB 4: Notify (Real-time Discord Notifications)
+  # ============================================================================
+  # This job sends real-time notifications to Discord about pipeline status.
+  # Runs regardless of success or failure to keep the team informed.
+  
+  notify:
+    name: 📢 Send Discord Notification
+    runs-on: ubuntu-latest
+    
+    # Run this job regardless of previous job outcomes (success or failure)
+    if: always()
+    
+    # This job needs build-and-release to complete (or be skipped)
+    # Using needs with if: always() ensures it runs even if previous jobs fail
+    needs: [security-scan, qa-matrix, build-and-release]
+    
+    steps:
+      # Step 1: Determine overall workflow status
+      - name: 🔍 Determine Workflow Status
+        id: status
+        run: |
+          if [[ "${{ needs.security-scan.result }}" == "failure" ]]; then
+            echo "status=❌ FAILED - Security Scan" >> $GITHUB_OUTPUT
+            echo "color=15158332" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.qa-matrix.result }}" == "failure" ]]; then
+            echo "status=❌ FAILED - QA Testing" >> $GITHUB_OUTPUT
+            echo "color=15158332" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.build-and-release.result }}" == "failure" ]]; then
+            echo "status=❌ FAILED - Build & Release" >> $GITHUB_OUTPUT
+            echo "color=15158332" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.build-and-release.result }}" == "success" ]]; then
+            echo "status=✅ SUCCESS - Released" >> $GITHUB_OUTPUT
+            echo "color=3066993" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.build-and-release.result }}" == "skipped" ]]; then
+            echo "status=⏭️ SKIPPED - Awaiting Approval" >> $GITHUB_OUTPUT
+            echo "color=16776960" >> $GITHUB_OUTPUT
+          else
+            echo "status=⚠️ UNKNOWN" >> $GITHUB_OUTPUT
+            echo "color=16776960" >> $GITHUB_OUTPUT
+          fi
+      
+      # Step 2: Send Discord notification
+      - name: 📢 Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "Enterprise Firmware Pipeline"
+          description: |
+            **Status:** ${{ steps.status.outputs.status }}
+            **Commit:** `${{ github.event.head_commit.message }}`
+            **Author:** ${{ github.event.head_commit.author.name }}
+            **Branch:** ${{ github.ref_name }}
+            
+            [View Workflow Run →](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          color: ${{ steps.status.outputs.color }}
+          username: "CI/CD Pipeline Bot"
+          avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
