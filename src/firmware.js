@@ -24,7 +24,7 @@ setTimeout(() => {
     
     // Simulate final system check
     setTimeout(() => {
-      console.log('✅ System OK');
+      console.log('✅ System Failed');
       console.log('');
       console.log('🚀 Firmware Ready for Deployment');
     }, 800);
