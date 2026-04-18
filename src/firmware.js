@@ -17,7 +17,7 @@
  *   node firmware.js Rev-A
  */
 
-// Get board name from command-line argument (default to 'Generic-Board' if not provided)
+// Get board name from command-line argument (default to 'Generic-Board' if not provided)....
 const boardName = process.argv[2] || 'Generic-Board';
 
 console.log(`🔋 Initializing Hardware for ${boardName}...`);
