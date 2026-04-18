@@ -128,6 +128,10 @@ jobs:
     name: 📦 Build and Release Enterprise Firmware
     runs-on: ubuntu-latest
     
+    # Production environment with required reviewer approval
+    environment: 
+      name: Production
+    
     # CRITICAL: This job depends on ALL qa-matrix jobs passing
     # If any board fails testing, this job never runs
     needs: qa-matrix
